@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Feed</string>
+    <string name="description">Description</string>
+    <string name="from">From : </string>
+    <string name="no_internet">No internet connection.</string>
+    <string name="like">LIKE</string>
+    <string name="unlike">UNLIKE</string>
+</resources>

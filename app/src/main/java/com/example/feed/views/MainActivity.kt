@@ -15,19 +15,21 @@ import com.example.feed.contract.ItemSelected
 import com.example.feed.datamodel.FeedDetailsModel
 import com.example.feed.utils.Utils
 import com.example.feed.R
+import com.example.feed.database.FeedDatabase
+import com.example.feed.database.FeedTableDB
 import com.google.gson.Gson
 
 
 class MainActivity : BaseActivity(),IFeedContract.View , ItemSelected {
 
     private var presenter : IFeedContract.Presenter ?= null
-    private var headerDates = HashSet<Long>()
     private val ACT_REQ_CODE = 101
-    private var arrListFeedDetails = arrayListOf<FeedDetailsModel>()
     var adapter : FeedAdapter ?= null
     private var position = 0
-    private var PRIVATE_MODE = 0
-    var sharedPref: SharedPreferences ?= null
+
+    private var mDb: FeedDatabase? = null
+    val tableDB = FeedTableDB()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,17 +37,34 @@ class MainActivity : BaseActivity(),IFeedContract.View , ItemSelected {
         super.view = cl_mainlayout
         presenter = FeedPresenter(this)
         adapter = FeedAdapter(this,this)
-        sharedPref = getSharedPreferences(Constants.FEED_MODEL, PRIVATE_MODE)
         presenter?.initData()
     }
 
     override fun retrieveSavedData(){
-        val data = sharedPref?.getString(Constants.FEED_MODEL,"")
-        if (!data.isNullOrEmpty()){
-            setAdapter(Gson().fromJson(data , Array<FeedDetailsModel>::class.java))
+        val data = fetchDataFromDB()//sharedPref?.getString(Constants.FEED_MODEL,"")
+        var feedData : Array<FeedDetailsModel> ?= null
+        if (data?.isNotEmpty() == true){
+            for (value in data) {
+                value.feedModel?.let {
+                    feedData = it
+                }
+            }
+            feedData?.let{fdata -> data.let{ presenter?.setArrList(fdata) }}
+            setAdapter()
         }
     }
 
+    private fun insertIntoDatabase() {
+        mDb = FeedDatabase.invoke(this)
+        mDb?.getDao()?.clearTable()
+        mDb?.getDao()?.insertData(tableDB)
+    }
+
+    private fun fetchDataFromDB(): Array<FeedTableDB>? {
+        mDb = FeedDatabase.invoke(this)
+        val list = mDb?.getDao()?.getDataFromDB()
+        return list
+    }
 
     override fun showProgress(){
         progressDialog?.visible()
@@ -61,37 +80,23 @@ class MainActivity : BaseActivity(),IFeedContract.View , ItemSelected {
         progressDialog?.gone()
     }
 
-    override fun setAdapter(arrFeedDetailsModel: Array<FeedDetailsModel>) {
+    override fun setAdapter() {
         val mLinearLayoutManager = LinearLayoutManager(this)
         mLinearLayoutManager.orientation = LinearLayoutManager.VERTICAL
         rv_feedDetails.layoutManager = mLinearLayoutManager
-        var index = 0
-        for (i in 0 until arrFeedDetailsModel.size) {
-            if (!headerDates.contains(arrFeedDetailsModel[i].time)) {
-                arrFeedDetailsModel[i].time?.let {
-                    adapter?.addSectionHeaderItem(it, index)
-                    headerDates.add(it)
-                }
-                arrListFeedDetails.add(index, FeedDetailsModel("","","","",0,""))
-                index++
-                arrListFeedDetails.add(index, arrFeedDetailsModel[i])
-                index++
-            } else {
-                arrListFeedDetails.add(index, arrFeedDetailsModel[i])
-                index++
-            }
-        }
-        adapter?.updateItem(arrListFeedDetails)
+        presenter?.getArrlist()?.let { adapter?.updateItem(it) }
         rv_feedDetails.adapter = adapter
         adapter?.notifyDataSetChanged()
         rv_feedDetails.visible()
-        storeToInternalStorage(arrFeedDetailsModel)
     }
 
-    private fun storeToInternalStorage(arrFeedDetailsModel: Array<FeedDetailsModel>){
-        val editor = sharedPref?.edit()
-        editor?.putString(Constants.FEED_MODEL, Gson().toJson(arrFeedDetailsModel))
-        editor?.apply()
+    override fun setAdapterHeaderValue(date: Long, value: Int) {
+        adapter?.addSectionHeaderItem(date, value)
+    }
+
+    override fun storeToInternalStorage(arrFeedDetailsModel: Array<FeedDetailsModel>){
+        tableDB.feedModel = arrFeedDetailsModel
+        insertIntoDatabase()
     }
 
     override fun onItemSelected(feedDetailsModel: FeedDetailsModel , position : Int) {
@@ -108,7 +113,7 @@ class MainActivity : BaseActivity(),IFeedContract.View , ItemSelected {
                 val receivedData = if (data?.hasExtra(Constants.FEED_MODEL)==true)
                     data.getParcelableExtra(Constants.FEED_MODEL) as FeedDetailsModel
                 else null
-                arrListFeedDetails[position].isLiked = receivedData?.isLiked
+                presenter?.updateList(position,receivedData?.isLiked)
                 adapter?.notifyItemChanged(position)
             }
         }

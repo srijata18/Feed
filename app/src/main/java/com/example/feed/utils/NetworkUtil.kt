@@ -19,17 +19,4 @@ object NetworkUtil {
         }
         return DISCONNECTED
     }
-
-//    fun getConnectivityStatusString(context: Context): Int {
-//        val conn = NetworkUtil.getConnectivityStatus(context)
-//        var status = 0
-//        if (conn == NetworkUtil.TYPE_WIFI) {
-//            status = NETWORK_STATUS_WIFI
-//        } else if (conn == NetworkUtil.TYPE_MOBILE) {
-//            status = NETWORK_STATUS_MOBILE
-//        } else if (conn == NetworkUtil.TYPE_NOT_CONNECTED) {
-//            status = NETWORK_STATUS_NOT_CONNECTED
-//        }
-//        return status
-//    }
 }

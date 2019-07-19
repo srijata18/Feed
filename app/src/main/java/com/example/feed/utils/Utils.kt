@@ -4,7 +4,11 @@ import android.content.Context
 import android.view.View
 import android.widget.Button
 import com.example.feed.R
+import com.example.feed.constants.Constants
 import com.example.feed.customViews.CustomSnackView
+import java.lang.Long
+import java.text.SimpleDateFormat
+import java.util.*
 
 class Utils {
     companion object {
@@ -44,6 +48,13 @@ class Utils {
                 setTextColor(context.resources.getColor(android.R.color.white))
                 text = context.getString(R.string.unlike)
             }
+        }
+
+        fun convertEpochTimeToDateTime(date : String): String{
+            val format = SimpleDateFormat(Constants.DATETIMEFORMAT , Locale.getDefault())
+            val date = Date(Long.parseLong(date))
+            val formattedDate = format.format(date)
+            return formattedDate
         }
     }
 }

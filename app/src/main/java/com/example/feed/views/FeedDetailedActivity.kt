@@ -34,7 +34,7 @@ class FeedDetailedActivity : BaseActivity() {
         finish()
     }
     fun setValue() {
-        tv_sectionHeader?.text = recievedDetails?.time.toString() ?: ""
+        tv_sectionHeader?.text = recievedDetails?.time?.let { Utils.convertEpochTimeToDateTime(it.toString())}
         tv_descriptionDetails?.text = recievedDetails?.description ?: ""
         if (!recievedDetails?.text.isNullOrEmpty() && !recievedDetails?.imageUrl.isNullOrEmpty()) {
             layout_content?.apply {

@@ -9,10 +9,16 @@ import android.widget.Button
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.example.feed.R
+import com.example.feed.constants.Constants
 import com.example.feed.contract.ItemSelected
 import com.example.feed.datamodel.FeedDetailsModel
 import com.example.feed.utils.Utils
 import kotlinx.android.synthetic.main.row_item_feed.view.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+
 
 class FeedAdapter(private val context : Context, val itemSelected : ItemSelected) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
@@ -85,14 +91,14 @@ class FeedAdapter(private val context : Context, val itemSelected : ItemSelected
                 isLiked = false
                 feedDetailsList[position].isLiked = isLiked
                 Utils.enableUnlikeView(holder.btn_like , context)
-                }else{
+            }else{
                 isLiked = true
                 feedDetailsList[position].isLiked = isLiked
                 Utils.enableLikeView(holder.btn_like , context)
             }
             }
         }else if ((holder is HeaderViewHolder)){
-            holder.tv_sectionHeader.text = sectionHeader[position].toString()
+            holder.tv_sectionHeader.text = Utils.convertEpochTimeToDateTime(sectionHeader[position].toString())
         }
     }
 

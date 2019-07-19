@@ -12,7 +12,10 @@ import retrofit2.Response
 class FeedPresenter(val view : IFeedContract.View) : IFeedContract.Presenter{
 
 
-    private val service = RetrofitClientInstance().getRetrofitInstance()?.create(GetDetails::class.java)
+    private val service = RetrofitClientInstance.create()//getRetrofitInstance()?.create(GetDetails::class.java)
+    var arrListFeedDetails = arrayListOf<FeedDetailsModel>()
+    private var headerDates = HashSet<Long>()
+
 
     override fun initData() {
         if(view.isNetworkAvailable()){
@@ -31,8 +34,11 @@ class FeedPresenter(val view : IFeedContract.View) : IFeedContract.Presenter{
         val call = service?.getAllFeeds()
         call?.enqueue(object : Callback<Array<FeedDetailsModel>> {
             override fun onResponse(call: Call<Array<FeedDetailsModel>>, response: Response<Array<FeedDetailsModel>>) {
-                if (response.body() != null && response.body() is Array<FeedDetailsModel>)
-                    view.setAdapter(response.body() as Array<FeedDetailsModel>)
+                if (response.body() != null && response.body() is Array<FeedDetailsModel>) {
+                    setData(response.body() as Array<FeedDetailsModel>)
+                    view.setAdapter()
+                    view.storeToInternalStorage(response.body() as Array<FeedDetailsModel>)
+                }
                 Log.i("INFO::","Success : ${response.body()}")
                 view.hideProgress()
             }
@@ -42,5 +48,39 @@ class FeedPresenter(val view : IFeedContract.View) : IFeedContract.Presenter{
                 Log.i("INFO::","Error : ${t.stackTrace}")
             }
         })
+    }
+
+    override fun getArrlist(): ArrayList<FeedDetailsModel> {
+        return arrListFeedDetails
+    }
+
+    override fun setData(arrFeedDetailsModel: Array<FeedDetailsModel>) {
+        var index = 0
+        for (i in 0 until arrFeedDetailsModel.size) {
+            if (!headerDates.contains(arrFeedDetailsModel[i].time)) {
+                arrFeedDetailsModel[i].time?.let {
+                    view.setAdapterHeaderValue(it, index)
+                    headerDates.add(it)
+                }
+                arrListFeedDetails.add(index, FeedDetailsModel("","","","",0,""))
+                index++
+                arrListFeedDetails.add(index, arrFeedDetailsModel[i])
+                index++
+            } else {
+                arrListFeedDetails.add(index, arrFeedDetailsModel[i])
+                index++
+            }
+        }
+    }
+
+    override fun setArrList(arrList: Array<FeedDetailsModel>) {
+        arrListFeedDetails.apply {
+            clear()
+            addAll(arrList)
+        }
+    }
+
+    override fun updateList(position: Int, value: Boolean?) {
+        arrListFeedDetails[position].isLiked = value
     }
 }

@@ -55,6 +55,8 @@ class FeedPresenter(val view : IFeedContract.View) : IFeedContract.Presenter{
     }
 
     override fun setData(arrFeedDetailsModel: Array<FeedDetailsModel>) {
+        arrListFeedDetails?.clear()
+        headerDates?.clear()
         var index = 0
         for (i in 0 until arrFeedDetailsModel.size) {
             if (!headerDates.contains(arrFeedDetailsModel[i].time)) {
@@ -70,13 +72,6 @@ class FeedPresenter(val view : IFeedContract.View) : IFeedContract.Presenter{
                 arrListFeedDetails.add(index, arrFeedDetailsModel[i])
                 index++
             }
-        }
-    }
-
-    override fun setArrList(arrList: Array<FeedDetailsModel>) {
-        arrListFeedDetails.apply {
-            clear()
-            addAll(arrList)
         }
     }
 

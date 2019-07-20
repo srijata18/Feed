@@ -17,7 +17,6 @@ interface IFeedContract {
         fun initData()
         fun setData(arrFeedDetailsModel: Array<FeedDetailsModel>)
         fun getArrlist() :  ArrayList<FeedDetailsModel>
-        fun setArrList(arrList : Array<FeedDetailsModel>)
         fun updateList(position : Int, value : Boolean?)
     }
 }

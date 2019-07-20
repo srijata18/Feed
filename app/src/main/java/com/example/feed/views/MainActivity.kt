@@ -49,7 +49,7 @@ class MainActivity : BaseActivity(),IFeedContract.View , ItemSelected {
                     feedData = it
                 }
             }
-            feedData?.let{fdata -> data.let{ presenter?.setArrList(fdata) }}
+            feedData?.let{fdata -> data.let{ presenter?.setData(fdata) }}
             setAdapter()
         }
     }
